@@ -14,32 +14,33 @@ export default class EntryAbility extends UIAbility {
   }
 
   async onWindowStageCreate(windowStage: window.WindowStage): Promise<void> {
-    // 检查是否有广告
-    const setting = new UserSettingClass(this.context)
+    // // 检查是否有广告
+    // const setting = new UserSettingClass(this.context)
+    // //
+    // const ad = await new Promise<AdvertClass>((resolve) => {
+    //   setTimeout(() => {
+    //     resolve(defaultAd) // 广告信息
+    //   }, 500)
+    //   // resolve()
+    // })
+    // // 通过模拟请求拿到广告信息
+    // // 写入首选项
+    // await setting.setUserAd(ad)
     //
-    const ad = await new Promise<AdvertClass>((resolve) => {
-      setTimeout(() => {
-        resolve(defaultAd) // 广告信息
-      }, 500)
-      // resolve()
-    })
-    // 通过模拟请求拿到广告信息
-    // 写入首选项
-    await setting.setUserAd(ad)
-    
-    if (ad.showAd) { // 显示广告
-      const win = await windowStage.createSubWindow("ad_window");
-      await win.showWindow(); // 展示窗口
-      win.setUIContent('pages/Start/Start') // 设置窗口内容
-    }
-    // 判断是否有TOKEN
-    const token = setting.getToken()
-    if (token) {
-      // 需要判断一下有没有token
-      windowStage.loadContent("pages/Index/Index") // 正常加载主页
-    } else {
-      windowStage.loadContent("pages/Login/Login") // 跳转到登录
-    }
+    // if (ad.showAd) { // 显示广告
+    //   const win = await windowStage.createSubWindow("ad_window");
+    //   await win.showWindow(); // 展示窗口
+    //   win.setUIContent('pages/Start/Start') // 设置窗口内容
+    // }
+    // // 判断是否有TOKEN
+    // const token = setting.getToken()
+    // if (token) {
+    //   // 需要判断一下有没有token
+    //   windowStage.loadContent("pages/Index/Index") // 正常加载主页
+    // } else {
+    //   windowStage.loadContent("pages/Login/Login") // 跳转到登录
+    // }
+    windowStage.loadContent('pages/IndexPage')
   }
 
   onWindowStageDestroy(): void {
