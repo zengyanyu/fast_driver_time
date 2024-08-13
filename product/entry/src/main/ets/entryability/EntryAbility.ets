@@ -1,6 +1,8 @@
 import { AbilityConstant, UIAbility, Want } from '@kit.AbilityKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { window } from '@kit.ArkUI';
+import { defaultAd, UserSettingClass } from '@ohos/basic/src/main/ets/utils/setting';
+import { AdvertClass } from '@ohos/basic';
 
 export default class EntryAbility extends UIAbility {
   onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void {
@@ -11,17 +13,33 @@ export default class EntryAbility extends UIAbility {
     hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onDestroy');
   }
 
-  onWindowStageCreate(windowStage: window.WindowStage): void {
-    // Main window is created, set main page for this ability
-    hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onWindowStageCreate');
-
-    windowStage.loadContent('pages/Index', (err) => {
-      if (err.code) {
-        hilog.error(0x0000, 'testTag', 'Failed to load the content. Cause: %{public}s', JSON.stringify(err) ?? '');
-        return;
-      }
-      hilog.info(0x0000, 'testTag', 'Succeeded in loading the content.');
-    });
+  async onWindowStageCreate(windowStage: window.WindowStage): Promise<void> {
+    // 检查是否有广告
+    const setting = new UserSettingClass(this.context)
+    //
+    const ad = await new Promise<AdvertClass>((resolve) => {
+      setTimeout(() => {
+        resolve(defaultAd) // 广告信息
+      }, 500)
+      // resolve()
+    })
+    // 通过模拟请求拿到广告信息
+    // 写入首选项
+    await setting.setUserAd(ad)
+    
+    if (ad.showAd) { // 显示广告
+      const win = await windowStage.createSubWindow("ad_window");
+      await win.showWindow(); // 展示窗口
+      win.setUIContent('pages/Start/Start') // 设置窗口内容
+    }
+    // 判断是否有TOKEN
+    const token = setting.getToken()
+    if (token) {
+      // 需要判断一下有没有token
+      windowStage.loadContent("pages/Index/Index") // 正常加载主页
+    } else {
+      windowStage.loadContent("pages/Login/Login") // 跳转到登录
+    }
   }
 
   onWindowStageDestroy(): void {
