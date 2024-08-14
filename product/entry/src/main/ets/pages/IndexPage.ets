@@ -50,8 +50,12 @@ struct IndexPage {
           message: '显示当前索引:' + index
         })
       })
-    }.width('100%').height('100%').padding({ left: '24vp', right: '24vp' })
+    }
+    .width('100%')
+    .height('100%')
+    .padding({
+      left: 24,
+      right: 24
+    })
   }
 }
-
-//

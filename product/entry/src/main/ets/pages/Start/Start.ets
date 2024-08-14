@@ -1,5 +1,4 @@
-import { AdvertClass, UserSettingClass } from '@ohos/basic'
-import { window } from '@kit.ArkUI'
+import { AdvertClass, UserSettingClass, winAlert, WinManager } from '@ohos/basic'
 
 @Entry
 @Component
@@ -26,7 +25,8 @@ struct Start {
   }
 
   closeWin() {
-    window.findWindow("ad_window").destroyWindow()
+    // window.findWindow("ad_window").destroyWindow()
+    winAlert.closeAd();
   }
 
   // 销毁页面时清理定时器

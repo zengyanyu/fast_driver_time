@@ -9,6 +9,9 @@ struct HmCardItem {
   showIcon: boolean = true
   // 是否显示下划线
   showBottomBorder: boolean = true
+  // 右侧点击事件
+  onRightClick: () => void = () => {
+  }
 
   build() {
     Column() {
@@ -30,13 +33,17 @@ struct HmCardItem {
               .aspectRatio(1)
           }
         }
-      }.width('100%')
+      }
+      .width('100%')
       .height(60)
       .border({
         color: $r('app.color.background_divider'),
         width: {
           bottom: this.showBottomBorder ? 1 : 0
         }
+      })
+      .onClick(() => {
+        this.onRightClick()
       })
       .justifyContent(FlexAlign.SpaceBetween)
     }

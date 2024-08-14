@@ -1,19 +1,63 @@
-import { HmCard, HmCardItem } from '@ohos/basic'
+import { HmCard, HmCardItem, HmProgress } from '@ohos/basic'
+import { getUserInfoAPI, getUserTaskInfoAPI } from '../../../api';
+import { UserInfo, UserInfoModel, UserTaskInfo, UserTaskInfoModel, UserTaskInfoParamsModel } from '../../../viewmodels';
+import { promptAction, router } from '@kit.ArkUI';
 
 // 我的组件
 @Preview
 @Component
 struct My {
+  @State
+  userInfo: UserInfoModel = new UserInfoModel({} as UserInfo)
+  @Consume
+  @Watch("getUserInfo")
+  currentName: string
+  // 请求参数
+  queryTaskParams: UserTaskInfoParamsModel = new UserTaskInfoParamsModel({
+    year: new Date().getFullYear().toString(), // 必须传值  不传值报错
+    month: (new Date().getMonth() + 1).toString() // 必须传值  不传值报错
+  })
+  // 返回结构
+  @State
+  userTaskInfo: UserTaskInfoModel = new UserTaskInfoModel({} as UserTaskInfo)
+  loadingDialog: CustomDialogController = new CustomDialogController({
+    builder: HmProgress({
+      title: '努力加载中......'
+    }),
+    customStyle: true,
+    alignment: DialogAlignment.Center
+  })
+
+  // 初始化-只获取一次
+  aboutToAppear(): void {
+    // this.getUserInfo();
+  }
+
+  // 每次点击的时候,都获取一次
+  // 获取用户信息
+  async getUserInfo() {
+    if (this.currentName === 'my') {
+      // 开启
+      this.loadingDialog.open();
+      this.userInfo = await getUserInfoAPI();
+
+      // 用户任务
+      this.userTaskInfo = await getUserTaskInfoAPI(this.queryTaskParams)
+      // 关闭
+      this.loadingDialog.close();
+    }
+  }
+
   build() {
     Column() {
       // 基本信息
       Column() {
-        Image($r("app.media.ic_avatar_driver"))
+        Image(this.userInfo.avatar)
           .width(67)
           .height(67)
           .borderRadius(34.5)
           .backgroundColor($r('app.color.white'))
-        Text("司机")
+        Text(`司机${this.userInfo.name}`)
           .fontSize(18)
           .fontWeight(600)
           .lineHeight(25)
@@ -22,8 +66,12 @@ struct My {
             bottom: 9
           })
           .fontColor($r('app.color.white'))
-        Text(`司机编号: 66666666`).fontSize(14).fontWeight(400).lineHeight(20).fontColor($r('app.color.white'))
-        Text(`手机号: 66666666`)
+        Text(`司机编号: ${this.userInfo.number}`)
+          .fontSize(14)
+          .fontWeight(400)
+          .lineHeight(20)
+          .fontColor($r('app.color.white'))
+        Text(`手机号: ${this.userInfo.phone}`)
           .fontSize(14)
           .fontWeight(400)
           .lineHeight(20)
@@ -47,14 +95,18 @@ struct My {
         Text("- 本月任务 -").fontSize(14).fontColor($r('app.color.text_secondary')).lineHeight(20)
         Row() {
           Column() {
-            Text("1000").fontSize(18).fontColor($r('app.color.text_primary')).lineHeight(25).margin({
-              bottom: 17
-            })
+            Text(this.userTaskInfo.taskAmounts?.toString())
+              .fontSize(18)
+              .fontColor($r('app.color.text_primary'))
+              .lineHeight(25)
+              .margin({
+                bottom: 17
+              })
             Text("任务总量").fontSize(12).fontColor($r('app.color.text_primary')).lineHeight(17)
           }.justifyContent(FlexAlign.SpaceAround).layoutWeight(1)
 
           Column() {
-            Text("1000")
+            Text(this.userTaskInfo.completedAmounts?.toString())
               .fontSize(18)
               .fontColor($r('app.color.text_primary'))
               .lineHeight(25)
@@ -63,7 +115,7 @@ struct My {
           }.justifyContent(FlexAlign.SpaceAround).layoutWeight(1)
 
           Column() {
-            Text("1000")
+            Text(this.userTaskInfo.transportMileage?.toString())
               .fontSize(18)
               .fontColor($r('app.color.text_primary'))
               .lineHeight(25)
@@ -95,7 +147,14 @@ struct My {
         })
         HmCardItem({
           leftTitle: '系统设置',
-          showBottomBorder: false
+          showBottomBorder: false,
+          onRightClick: () => {
+            // promptAction.showToast({ message: '点击事件成功' })
+            // 路由跳转
+            router.pushUrl({
+              url: 'pages/Setting/Setting'
+            })
+          }
         })
       }
 
@@ -106,41 +165,6 @@ struct My {
       //     HmCardItem({ leftTitle: 'xxx' })
       //   }
       // })
-
-      // Column() {
-      //   Row() {
-      //     Text("车辆信息").fontSize(16).fontWeight(400).fontColor($r('app.color.text_primary'))
-      //     Image($r("app.media.ic_btn_more")).width(24).height(24)
-      //   }
-      //   .justifyContent(FlexAlign.SpaceBetween)
-      //   .alignItems(VerticalAlign.Center)
-      //   .border({ width: { bottom: 1 }, color: $r('app.color.background_page') })
-      //   .width('100%')
-      //   .height(60)
-      //
-      //   Row() {
-      //     Text("任务数据").fontSize(16).fontWeight(400).fontColor($r('app.color.text_primary'))
-      //     Image($r("app.media.ic_btn_more")).width(24).height(24)
-      //   }
-      //   .justifyContent(FlexAlign.SpaceBetween)
-      //   .alignItems(VerticalAlign.Center)
-      //   .border({ width: { bottom: 1 }, color: $r('app.color.background_page') })
-      //   .width('100%')
-      //   .height(60)
-      //
-      //   Row() {
-      //     Text("系统设置").fontSize(16).fontWeight(400).fontColor($r('app.color.text_primary'))
-      //     Image($r("app.media.ic_btn_more")).width(24).height(24)
-      //   }
-      //   .justifyContent(FlexAlign.SpaceBetween)
-      //   .alignItems(VerticalAlign.Center)
-      //   .width('100%')
-      //   .height(60)
-      // }
-      // .padding({ left: 17.5, right: 17.5 })
-      // .backgroundColor($r('app.color.white'))
-      // .margin({ left: 14.5, right: 14.5, bottom: 15 })
-      // .borderRadius(8)
 
     }.width('100%').height('100%').backgroundColor($r('app.color.background_page')).borderRadius(8)
   }
