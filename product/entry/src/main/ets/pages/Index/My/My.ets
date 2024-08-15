@@ -28,23 +28,22 @@ struct My {
     alignment: DialogAlignment.Center
   })
 
-  // 初始化-只获取一次
-  aboutToAppear(): void {
-    // this.getUserInfo();
-  }
-
   // 每次点击的时候,都获取一次
-  // 获取用户信息
   async getUserInfo() {
     if (this.currentName === 'my') {
-      // 开启
-      this.loadingDialog.open();
-      this.userInfo = await getUserInfoAPI();
+      try {
+        // 开启
+        this.loadingDialog.open();
+        // 获取用户信息
+        this.userInfo = await getUserInfoAPI();
 
-      // 用户任务
-      this.userTaskInfo = await getUserTaskInfoAPI(this.queryTaskParams)
-      // 关闭
-      this.loadingDialog.close();
+        // 用户任务
+        this.userTaskInfo = await getUserTaskInfoAPI(this.queryTaskParams)
+      } catch (error) {
+      } finally {
+        // 关闭
+        this.loadingDialog.close();
+      }
     }
   }
 
@@ -157,15 +156,6 @@ struct My {
           }
         })
       }
-
-      // 不能正常显示如下的代码
-      // 错误信息:Error message:class constructor cannot called without 'new'
-      // HmCard({
-      //   HmCardFn: () => {
-      //     HmCardItem({ leftTitle: 'xxx' })
-      //   }
-      // })
-
     }.width('100%').height('100%').backgroundColor($r('app.color.background_page')).borderRadius(8)
   }
 }

@@ -1,4 +1,5 @@
 import { TabClass } from '@ohos/basic'
+import TaskList from './TaskList'
 
 @Component
 struct TaskTabs {
@@ -18,7 +19,11 @@ struct TaskTabs {
     Tabs() {
       ForEach(this.tabsData, (item: TabClass) => {
         TabContent() {
-          Text(item.title)
+          if (item.name === 'waiting') { // 待提货
+            TaskList()
+          } else {
+            Text(item.title)
+          }
         }
         .tabBar(
           SubTabBarStyle.of(item.title)
@@ -49,3 +54,4 @@ struct TaskTabs {
 }
 
 export default TaskTabs
+

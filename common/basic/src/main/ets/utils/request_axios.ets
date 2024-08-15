@@ -9,11 +9,10 @@ const instance = axios.create({
   timeout: 10000
 })
 
-// 两个拦截器
-// 请求拦截器
-// 响应拦截器
+// 两个拦截器 1.请求拦截器 2.响应拦截器
 
 // 1. 成功 2.失败
+// 请求拦截器
 instance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   // 请求的参数
   if (AppStorage.get(TOKEN_KEY)) {
@@ -35,7 +34,7 @@ instance.interceptors.response.use((response: AxiosResponse) => {
     return Promise.reject(new Error(response.data.msg))
   }
 }, (error: AxiosError) => {
-  if (error?.status === 401) {
+  if (error?.response?.status === 401) {
     new UserSettingClass(getContext()).setToken("") // 清空首选项
     AppStorage.setOrCreate(TOKEN_KEY, "") // 设置全局的token为空
     router.replaceUrl({

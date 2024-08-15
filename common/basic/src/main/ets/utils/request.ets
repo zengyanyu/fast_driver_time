@@ -18,7 +18,7 @@ async function requestHttp<T>(url: string, method: http.RequestMethod = http.Req
     // 判断对象不为空
     if (data && Object.keys(data).length) {
       // url?a=1&b=2&c=3
-      urlStr += "?" + Object.keys(data).map(key => {
+      urlStr += "?" + Object.keys(data).filter(key =>!!data[key]).map(key => {
         return `${key}=${data[key]}` // ["a=1", "b=2", "c=3"]
       }).join("&")
     }
