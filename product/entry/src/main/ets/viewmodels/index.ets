@@ -3,3 +3,5 @@ export * from './user'
 export * from './user_task'
 
 export * from './router'
+
+export * from './pick_up'

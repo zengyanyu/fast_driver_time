@@ -12,4 +12,10 @@ export * from './HmProgress'
 
 export * from './HmList'
 
+export * from './HmUpload'
+
+export * from './HmToggleCard'
+
+export * from './HmPreview'
+
 

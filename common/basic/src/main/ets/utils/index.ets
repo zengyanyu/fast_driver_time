@@ -5,3 +5,5 @@ export * from './request'
 export * from './request_axios'
 
 export * from './win_manager'
+
+export * from './sound'

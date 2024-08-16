@@ -1,4 +1,5 @@
 import { TabClass } from '@ohos/basic'
+import { TaskListParams, TaskListParamsModel, TaskTypeEnum } from '../../../viewmodels/task'
 import TaskList from './TaskList'
 
 @Component
@@ -21,6 +22,14 @@ struct TaskTabs {
         TabContent() {
           if (item.name === 'waiting') { // 待提货
             TaskList()
+          } else if (item.name === 'line') { // 在途
+            TaskList({
+              queryParams: new TaskListParamsModel({
+                status: TaskTypeEnum.Line, // 请求的类型
+                page: 1, // 默认请求第一页
+                pageSize: 5 // 每页显示5条
+              } as TaskListParams)
+            })
           } else {
             Text(item.title)
           }
@@ -46,10 +55,6 @@ struct TaskTabs {
     .barHeight(60)
     .barBackgroundColor($r("app.color.white"))
     .backgroundColor($r("app.color.background_page"))
-
-    // .padding({
-    //   top: AppStorage.get<number>(APP_TOP_HEIGHT)
-    // })
   }
 }
 

@@ -162,7 +162,8 @@ export class TaskInfoItemModel implements TaskInfoItem {
 // 类型枚举
 
 export enum TaskTypeEnum {
-  Waiting = 1,  // 待提货
+  Waiting = 1, // 待提货
   Line = 2, // 在送货
+  Delivered = 4, // 已交 但是未回车登记的情况
   Finish = 6 // 已完成
 }

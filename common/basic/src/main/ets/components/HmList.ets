@@ -1,3 +1,5 @@
+import { sound } from '../utils'
+
 @Component
 export struct HmList {
   @State
@@ -115,6 +117,8 @@ export struct HmList {
         this.refreshIng = false
         // 关闭loading
         this.loading = false
+
+        sound.playAudio('sound.mp3')
       }
     })
   }

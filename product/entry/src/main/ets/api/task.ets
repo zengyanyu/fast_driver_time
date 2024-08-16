@@ -1,5 +1,6 @@
 // 任务的请求接口文件
 import { RequestAxios } from '@ohos/basic'
+import { PickUpParamsModel } from '../viewmodels'
 import { TaskDetailInfoModel } from '../viewmodels/detail'
 import { TaskListDataModel, TaskListParamsModel } from '../viewmodels/task'
 
@@ -11,4 +12,9 @@ export const getTaskListAPI = (params: TaskListParamsModel) => {
 // 获取任务详情
 export const getTaskDetailAPI = (id: string) => {
   return RequestAxios.get<TaskDetailInfoModel>(`/tasks/details/${id}`)
+}
+
+// 提货api
+export const pickUpAPI = (data: PickUpParamsModel) => {
+  return RequestAxios.post<null>("/tasks/takeDelivery", data)
 }

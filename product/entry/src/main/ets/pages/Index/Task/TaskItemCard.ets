@@ -1,5 +1,5 @@
 import { promptAction, router } from '@kit.ArkUI'
-import { TaskInfoItem, TaskInfoItemModel } from '../../../viewmodels/task'
+import { TaskInfoItem, TaskInfoItemModel, TaskTypeEnum } from '../../../viewmodels/task'
 
 @Preview
 @Component
@@ -10,7 +10,26 @@ struct TaskItemCard {
     if (this.item.enablePickUp) {
       return true
     }
-    return false
+    switch (parseInt(this.item.status)) {
+      case TaskTypeEnum.Line:
+      case TaskTypeEnum.Delivered:
+        return true
+      default:
+        return false
+    }
+  }
+
+  getBtnText() {
+    switch (parseInt(this.item.status)) {
+      case TaskTypeEnum.Waiting:
+        return "提货"
+      case TaskTypeEnum.Line:
+        return "交货"
+      case TaskTypeEnum.Delivered:
+        return "回车登记"
+      default:
+        return ""
+    }
   }
 
   // 去提货
@@ -84,7 +103,7 @@ struct TaskItemCard {
           Text(this.item.planDepartureTime).fontSize(14).fontColor($r('app.color.text_secondary')).margin({ top: 4 })
         }.alignItems(HorizontalAlign.Start)
 
-        Button("提货", { type: ButtonType.Capsule })
+        Button(this.getBtnText(), { type: ButtonType.Capsule })
           .backgroundColor($r('app.color.primary'))
           .fontColor($r("app.color.white"))
           .fontSize(14)

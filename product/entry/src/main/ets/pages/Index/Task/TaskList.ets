@@ -58,6 +58,7 @@ struct TaskList {
       loadingText: '在加啦',
       finishText: '--我也是有底线的--'
     })
+      .height('100%')
   }
 }
 
