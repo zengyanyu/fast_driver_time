@@ -21,10 +21,10 @@ struct TaskList {
   async getTaskList(refresh?: boolean) {
     const result = await getTaskListAPI(this.queryParams)
     if (refresh) {
-      this.taskListData = result.items // 直接赋值
+      this.taskListData = result.items || [] // 直接赋值
     } else {
       // 追加
-      this.taskListData = this.taskListData.concat(result.items) // 将下一页数据放置到后面
+      this.taskListData = this.taskListData.concat(result.items || []) // 将下一页数据放置到后面
     }
     this.allPage = result.pages // 获取总页数
     this.queryParams.page++ // 每次页码+1

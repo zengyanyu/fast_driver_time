@@ -5,6 +5,7 @@
     "pages/Start/Start",
     "pages/IndexPage",
     "pages/Setting/Setting",
-    "pages/TaskDetail/TaskDetail"
+    "pages/TaskDetail/TaskDetail",
+    "pages/CarRecord/CarRecord"
   ]
 }

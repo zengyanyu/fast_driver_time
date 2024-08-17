@@ -18,4 +18,6 @@ export * from './HmToggleCard'
 
 export * from './HmPreview'
 
+export * from './HmCheckBox'
+
 

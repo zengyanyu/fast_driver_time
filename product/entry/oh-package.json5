@@ -6,7 +6,9 @@
   "author": "",
   "license": "",
   "dependencies": {
-    "@ohos/basic": "file:./../../common/basic"
-  }
+    "@ohos/basic": "file:./../../common/basic",
+    "dayjs": "^1.11.7"
+  },
+  "devDependencies": {},
+  "dynamicDependencies": {}
 }
-

@@ -15,6 +15,9 @@ struct HmUpload {
   imgList: ImageList[] = [] // [{ url }]
   onListChange: (list: ImageList[]) => void = () => {
   }
+  // 能否进行上传操作
+  @Prop
+  canUpload: boolean = true
   index: number = -1 // 记录当前点击的索引的值
   previewDialog: CustomDialogController = new CustomDialogController({
     builder: HmPreview({
@@ -38,8 +41,6 @@ struct HmUpload {
       this.onListChange(this.imgList) // 传出去
       // 通知父组件
     }
-
-    // AlertDialog.show({ message: JSON.stringify(result) })
   }
 
   build() {
@@ -56,13 +57,16 @@ struct HmUpload {
                 .width("100%")
                 .aspectRatio(1)
                 .borderRadius(4)
-              Image($r("app.media.ic_btn_delete"))
-                .width(30)
-                .aspectRatio(1)
-                .onClick(() => {
-                  this.imgList.splice(index, 1) // 移除本组件数据
-                  this.onListChange(this.imgList)
-                })
+              // 判断是否可以删除文件
+              if (this.canUpload) {
+                Image($r("app.media.ic_btn_delete"))
+                  .width(30)
+                  .aspectRatio(1)
+                  .onClick(() => {
+                    this.imgList.splice(index, 1) // 移除本组件数据
+                    this.onListChange(this.imgList)
+                  })
+              }
             }
 
           }.onClick(() => {
@@ -72,20 +76,22 @@ struct HmUpload {
         })
         if (this.imgList.length < this.maxNumber) {
           // 只有数量未达到最大数量时才可以显示
-          GridItem() {
-            Row() {
-              Image($r("app.media.ic_add_img")).width(30).height(30)
+          if (this.canUpload) {
+            GridItem() {
+              Row() {
+                Image($r("app.media.ic_add_img")).width(30).height(30)
+              }
+              .width("100%")
+              .aspectRatio(1)
+              .backgroundColor('#F2F2F2')
+              .alignItems(VerticalAlign.Center)
+              .justifyContent(FlexAlign.Center)
             }
-            .width("100%")
-            .aspectRatio(1)
-            .backgroundColor('#F2F2F2')
-            .alignItems(VerticalAlign.Center)
-            .justifyContent(FlexAlign.Center)
+            .onClick(() => {
+              // 选择相册
+              this.selectImage()
+            })
           }
-          .onClick(() => {
-            // 选择相册
-            this.selectImage()
-          })
         }
       }
       .columnsGap(10)
