@@ -53,7 +53,7 @@ struct TaskList {
       },
       onRefresh: async () => {
         await this.onRefresh()
-        promptAction.showToast({ message: '刷新成功' })
+        // promptAction.showToast({ message: '刷新成功' })
       },
       loadingText: '在加啦',
       finishText: '--我也是有底线的--'

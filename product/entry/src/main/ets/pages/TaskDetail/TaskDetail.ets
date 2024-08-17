@@ -67,9 +67,12 @@ struct TaskDetail {
         top: 20
       })
 
-    }.justifyContent(FlexAlign.SpaceBetween).alignItems(VerticalAlign.Center).width('100%')
+    }.justifyContent(FlexAlign.SpaceBetween)
+    .alignItems(VerticalAlign.Center)
+    .width('100%')
 
-    Divider().vertical(false).height(2).color($r('app.color.background_divider')).margin({ left: 8, right: 8, top: 21 })
+    Divider().vertical(false).height(2)
+      .color($r('app.color.background_divider')).margin({ left: 8, right: 8, top: 21 })
     this.getBaseContentItem({
       title: '任务编号',
       value: this.taskDetailData.transportTaskId
@@ -91,7 +94,6 @@ struct TaskDetail {
       title: '预计送达时间',
       value: this.taskDetailData.planArrivalTime
     })
-
   }
 
   // 司机信息
@@ -136,28 +138,10 @@ struct TaskDetail {
           .fontWeight(600)
         Text(this.taskDetailData.endCity).fontSize(14).lineHeight(22)
       }.width(50)
-    }.justifyContent(FlexAlign.SpaceBetween).alignItems(VerticalAlign.Center).width('100%').padding({
+    }.justifyContent(FlexAlign.SpaceBetween)
+    .alignItems(VerticalAlign.Center).width('100%').padding({
       left: 60,
       right: 60
-    })
-  }
-
-  // 提货信息
-  @Builder
-  getPickUpContent() {
-    HmUpload({
-      title: '请拍照上传回单凭证',
-      imgList: this.taskDetailData.cargoPickUpPictureList || [],
-      onListChange: (list: ImageList[]) => {
-        this.taskDetailData.cargoPickUpPictureList = list
-      }
-    })
-    HmUpload({
-      title: '请拍照上传货品照片',
-      imgList: this.taskDetailData.cargoPictureList || [],
-      onListChange: (list: ImageList[]) => {
-        this.taskDetailData.cargoPictureList = list
-      }
     })
   }
 
@@ -283,6 +267,28 @@ struct TaskDetail {
       && this.taskDetailData.cargoPickUpPictureList?.every(item =>!!item)
   }
 
+  // 提货信息
+  @Builder
+  getPickUpContent() {
+    HmUpload({
+      title: '请拍照上传回单凭证',
+      imgList: this.taskDetailData.cargoPickUpPictureList || [],
+      onListChange: (list: ImageList[]) => {
+        this.taskDetailData.cargoPickUpPictureList = list
+      },
+      canUpload: this.taskDetailData.status === TaskTypeEnum.Waiting
+    })
+    HmUpload({
+      title: '请拍照上传货品照片',
+      imgList: this.taskDetailData.cargoPictureList || [],
+      onListChange: (list: ImageList[]) => {
+        this.taskDetailData.cargoPictureList = list
+      },
+      canUpload: this.taskDetailData.status === TaskTypeEnum.Waiting
+    })
+  }
+
+  // 送货
   @Builder
   getDeliverContent() {
     HmUpload({
