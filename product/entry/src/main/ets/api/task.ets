@@ -1,6 +1,6 @@
 // 任务的请求接口文件
 import { RequestAxios } from '@ohos/basic'
-import { PickUpParamsModel } from '../viewmodels'
+import { DelayParamsTypeModel, ExceptionParamsTypeModel, PickUpParamsModel } from '../viewmodels'
 import { CarRecordTypeModel } from '../viewmodels/car_record'
 import { DeliverParamsTypeModel } from '../viewmodels/deliver'
 import { TaskDetailInfoModel } from '../viewmodels/detail'
@@ -29,4 +29,14 @@ export const deliverAPI = (data: DeliverParamsTypeModel) => {
 // 回车登记
 export const carRecordAPI = (data: CarRecordTypeModel) => {
   return RequestAxios.post<null>("/tasks/truckRegistration", data)
+}
+
+// 上报异常
+export const exportExceptionAPI = (data: ExceptionParamsTypeModel) => {
+  return RequestAxios.post<null>("/tasks/reportException", data)
+}
+
+// 延迟提货
+export const delayAPI = (data: DelayParamsTypeModel) => {
+  return RequestAxios.put<null>('/tasks/delay', data);
 }

@@ -158,6 +158,15 @@ struct TaskDetail {
           .fontSize(16)
           .height(50)
           .width(125)
+          .onClick(() => {
+            router.pushUrl({
+              url: 'pages/Delay/DelayPage',
+              params: {
+                id: this.taskDetailData.id,
+                oldTime: this.taskDetailData.planDepartureTime
+              }
+            })
+          })
         Button("提货", { type: ButtonType.Capsule })
           .backgroundColor($r('app.color.primary'))
           .fontColor($r('app.color.white'))
@@ -175,6 +184,15 @@ struct TaskDetail {
           .fontSize(16)
           .height(50)
           .width(125)
+          .onClick(() => {
+            // 跳转到上报异常页面
+            router.pushUrl({
+              url: 'pages/Exception/Exception',
+              params: {
+                id: this.taskDetailData.transportTaskId
+              }
+            })
+          })
         Button("交货", { type: ButtonType.Capsule })
           .backgroundColor($r('app.color.primary'))
           .fontColor($r('app.color.white'))

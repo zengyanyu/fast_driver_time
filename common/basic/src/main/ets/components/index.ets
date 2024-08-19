@@ -20,4 +20,6 @@ export * from './HmPreview'
 
 export * from './HmCheckBox'
 
+export * from './HmSelectCard'
+
 
