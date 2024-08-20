@@ -5,6 +5,10 @@ import { HmNavBar, HmSkeleton, HmToggleCard, HmUpload, ImageList, UploadFile } f
 import { TaskDetailInfo, TaskDetailInfoModel } from '../../viewmodels/detail';
 import { CommonRouterParams, DeliverParamsTypeModel, PickUpParamsModel } from '../../viewmodels';
 import { TaskTypeEnum } from '../../viewmodels/task';
+import { taskpool, util, worker } from '@kit.ArkTS';
+import { PostParams } from '../../workers/UploadWorker';
+import { image } from '@kit.ImageKit';
+import { fileIo } from '@kit.CoreFileKit';
 
 @Entry
 @Component
@@ -150,7 +154,6 @@ struct TaskDetail {
   getBottomBtn() {
     //已完成不显示任何按钮
     Row() {
-
       if (this.taskDetailData.status === TaskTypeEnum.Waiting) {
         Button("延迟收货", { type: ButtonType.Capsule })
           .backgroundColor($r('app.color.btn_gray'))
@@ -238,8 +241,18 @@ struct TaskDetail {
 
   // 去提货
   async toPickUp() {
-    const result = await Promise.all([UploadFile(this.taskDetailData.cargoPictureList),
-      UploadFile(this.taskDetailData.cargoPickUpPictureList)])
+    const task1 = new taskpool.Task(dealImage,
+      [...this.taskDetailData.cargoPictureList], getContext().cacheDir) // 子线程
+    const task2 =
+      new taskpool.Task(dealImage, [...this.taskDetailData.cargoPickUpPictureList],
+        getContext().cacheDir) // 子线程
+    const result1 = await taskpool.execute(task1) // 执行任务
+    const result2 = await taskpool.execute(task2) // 执行任务
+    const result = await Promise.all([UploadFile(result1 as ImageList[]),
+      UploadFile(result2 as ImageList[])])
+    // const result = await Promise.all([UploadFile(this.taskDetailData.cargoPictureList),
+    //   UploadFile(this.taskDetailData.cargoPickUpPictureList)])
+
     // const cargoPictureList = await UploadFile(this.taskDetailData.cargoPictureList) // 上传之后的地址
     // const cargoPickUpPictureList = await UploadFile(this.taskDetailData.cargoPickUpPictureList) // 上传之后的地址
     // 提货操作
@@ -255,16 +268,65 @@ struct TaskDetail {
 
   // 交货操作
   async btnDeliver() {
-    const result = await Promise.all([UploadFile(this.taskDetailData.certificatePictureList),
-      UploadFile(this.taskDetailData.deliverPictureList)])
+    // 可以对图片进行压缩->耗时任务->多线程
+    const worker1 = new worker.ThreadWorker('entry/ets/workers/UploadWorker.ets'); // 子线程1
+    const worker2 = new worker.ThreadWorker('entry/ets/workers/UploadWorker.ets'); // 子线程2
+    let certificatePictureList: ImageList[] = []
+    let deliverPictureList: ImageList[] = []
+    // 线程1的消息
+    worker1.onmessage = (event) => {
+      const res = event.data as PostParams
+      certificatePictureList = res.images
+      checkFile()
+    }
+    // 线程2的消息
+    worker2.onmessage = (event) => {
+      const res = event.data as PostParams
+      // res.images // 最终要的结构
+      deliverPictureList = res.images
+      checkFile()
+    }
 
-    await deliverAPI(new DeliverParamsTypeModel({
-      id: this.taskDetailData.id,
-      certificatePictureList: result[0],
-      deliverPictureList: result[1],
-    }))
-    promptAction.showToast({ message: '交货成功' })
-    this.getTaskDetail(this.taskDetailData.id) // 重新拉取数据
+    worker1.postMessage({
+      // 被State修饰的数据不是普通结构,所以这里需要使用浅拷贝,使用三个点...
+      images: [...this.taskDetailData.certificatePictureList],
+      // 多线程没有上下文,getContext返回undefined
+      filePath: getContext().cacheDir
+    })
+    worker2.postMessage({
+      // 被State修饰的数据不是普通结构,所以这里需要使用浅拷贝,使用三个点...
+      images: [...this.taskDetailData.deliverPictureList],
+      // 多线程没有上下文,getContext返回undefined
+      filePath: getContext().cacheDir
+    })
+
+    const checkFile = async () => {
+      if (certificatePictureList.length && deliverPictureList.length) {
+        // 图片压缩完成
+        const result = await Promise.all([UploadFile(certificatePictureList),
+          UploadFile(deliverPictureList)])
+
+        await deliverAPI(new DeliverParamsTypeModel({
+          id: this.taskDetailData.id,
+          certificatePictureList: result[0],
+          deliverPictureList: result[1],
+        }))
+        promptAction.showToast({ message: '交货成功' })
+        this.getTaskDetail(this.taskDetailData.id) // 重新拉取数据
+      }
+    }
+
+
+    // const result = await Promise.all([UploadFile(this.taskDetailData.certificatePictureList),
+    //   UploadFile(this.taskDetailData.deliverPictureList)])
+    //
+    // await deliverAPI(new DeliverParamsTypeModel({
+    //   id: this.taskDetailData.id,
+    //   certificatePictureList: result[0],
+    //   deliverPictureList: result[1],
+    // }))
+    // promptAction.showToast({ message: '交货成功' })
+    // this.getTaskDetail(this.taskDetailData.id) // 重新拉取数据
   }
 
   // 判断交货按钮是否可点
@@ -399,4 +461,29 @@ class BaseBuilderClass {
   title: string = ""
   value: string = ""
   icon?: ResourceStr = ""
+}
+
+// taskPool 不允许把耗时的任务没有结束就返回
+// 不要一个没有结果的东西
+// taskPool 只能执行Concurrent修饰符修饰的函数
+@Concurrent
+async function dealImage(images: ImageList[], path: string) {
+  const imagePackerAPI = image.createImagePacker() // 创建图片压缩API
+  let packOpts: image.PackingOption = { format: "image/jpeg", quality: 20 };
+  let arr: ImageList[] = []
+  while (images.length) {
+    const obj = images.pop() // 每次取一条
+    const sourceFile = fileIo.openSync(obj?.url, fileIo.OpenMode.READ_ONLY) // 打开来源文件
+    // 对来源文件进行压缩
+    const newFileName = path + "/" + util.generateRandomUUID() + ".jpg"
+    const targetFile = fileIo.openSync(newFileName, fileIo.OpenMode.CREATE | fileIo.OpenMode.READ_WRITE)
+    // 目标文件的fd
+    await imagePackerAPI.packToFile(image.createImageSource(sourceFile.fd), targetFile.fd, packOpts)
+    fileIo.closeSync(sourceFile.fd) // 关闭来源文件
+    fileIo.closeSync(targetFile.fd) // 关闭目标文件
+    arr.push({
+      url: newFileName
+    })
+  }
+  return arr
 }
